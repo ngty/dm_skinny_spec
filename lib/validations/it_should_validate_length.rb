@@ -41,13 +41,13 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
 
       def validate_equal( attr, context, equal, opts )
         err_msg = (opts[:message]||'%s must be %s characters long') % 
-          [ humanize_attr(attr), equal ]
+          [ humanize(attr), equal ]
         validate_range attr, context, equal..equal, opts.merge(:message=>err_msg)
       end
 
       def validate_range( attr, context, range, opts )
         err_msg = (opts[:message]||'%s must be between %s and %s characters long') %
-          [ humanize_attr(attr), range.min, range.max ]
+          [ humanize(attr), range.min, range.max ]
 
         if range.min == 0
           opts.update( :message => err_msg )
@@ -63,7 +63,7 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
       def validate_max( attr, context, max, opts )
         is_max = (val=opts[:is_max]).nil? ? true : nil
         err_msg = (opts[:message]||'%s must be less than %s characters long') % 
-          [ humanize_attr(attr), max ]
+          [ humanize(attr), max ]
         err_val = 'x' * max.succ
 
         validate_nil_val attr, context, opts[:allow_nil], 
@@ -78,7 +78,7 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
 
       def validate_min( attr, context, min, opts )
         err_msg = (opts[:message]||'%s must be more than %s characters long') % 
-          [ humanize_attr(attr), min ]
+          [ humanize(attr), min ]
 
         if min.pred >= 0
           err_val = 'x' * min.pred
@@ -98,7 +98,10 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
         if allow_nil or opts[:is_max]
           validate_ok_val attr, nil, context, "should be valid if :#{attr} is nil"
         else
+          err_msg = opts[:message]
           validate_err_val attr, nil, context, "should not be valid if :#{attr} is nil"
+          validate_err_msg attr, nil, err_msg, context, 
+            "should have error \"#{err_msg}\" if :#{attr} is nil"
         end
       end
 
