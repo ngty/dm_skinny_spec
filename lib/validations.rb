@@ -49,12 +49,17 @@ if Object.const_defined?('DataMapper') && DataMapper.const_defined?('Validate')
         end
 
         def example_str_for_context( example_str, context )
-          example_str += " (when :#{context})" unless context == :default
+          example_str += " (for :#{context})" unless context == :default
           example_str
         end
 
-        def humanize_attr(attr)
-          Extlib::Inflection.humanize(attr.to_s)
+        def humanize(arg)
+          case arg
+            when Symbol ; Extlib::Inflection.humanize(arg.to_s)
+            when nil    ; 'nil'
+            when String ; '"%s"'.t(arg)
+            else        ; arg.to_s
+          end
         end
 
     end
@@ -63,12 +68,14 @@ if Object.const_defined?('DataMapper') && DataMapper.const_defined?('Validate')
 
   require 'validations/it_should_validate_present'
   require 'validations/it_should_validate_absent'
+  require 'validations/it_should_validate_is_accepted'
   require 'validations/it_should_validate_is_unique'
   require 'validations/it_should_validate_length'
   require 'validations/it_should_validate_format'
 
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidatePresent)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateAbsent)
+  Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateIsAccepted)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateIsUnique)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateLength)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateFormat)
