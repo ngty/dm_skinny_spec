@@ -19,7 +19,7 @@ describe 'it_should_validate_absent' do
     end
 
     Page.fix {{ 
-      :first_unwanted  => [ nil, ''].pick,
+      :first_unwanted  => [ nil, '' ].pick,
       :second_unwanted => [ nil, '' ].pick,
       :is_unwanted     => [ nil, false ].pick
     }}
