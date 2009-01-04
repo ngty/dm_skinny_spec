@@ -5,11 +5,11 @@ describe "it_should_validate_is_accepted" do
 
   before do
 
-    DEFAULT_TRUES = [ '1', 1, 'true', true, 't' ]
-
     class Agreement
 
       include DataMapper::Resource
+
+      DEFAULT_TRUES = [ '1', 1, 'true', true, 't' ]
 
       property :id,           Serial
       property :license,      String, :auto_validation => false
@@ -24,9 +24,9 @@ describe "it_should_validate_is_accepted" do
     end
 
     Agreement.fix {{ 
-      :terms         => ::DEFAULT_TRUES.pick,
-      :license       => ::DEFAULT_TRUES.pick,
-      :more_license  => ::DEFAULT_TRUES.pick,
+      :terms         => Agreement::DEFAULT_TRUES.pick,
+      :license       => Agreement::DEFAULT_TRUES.pick,
+      :more_license  => Agreement::DEFAULT_TRUES.pick,
       :more_terms    => [ '1', 1 ].pick
     }}
 
@@ -36,17 +36,15 @@ describe "it_should_validate_is_accepted" do
 
   after do
     Object.send( :remove_const, 'Agreement' )
-    Object.send( :remove_const, 'DEFAULT_TRUES' )
   end
 
   def instance(id=:default)
     @instances[id] ||= Agreement.gen
   end
 
-  describe ':more_terms, :valids => [...], :invalids => [...]' do
+  describe ':more_terms, :reject => [...]' do
     it_should_validate_is_accepted :more_terms, 
-      :valids => [ '1', 1 ], 
-      :invalids => [ '0', 0, 'true', true, 't', 'false', false, 'f' ]
+      :reject => [ '0', 0, 'true', true, 't', 'false', false, 'f' ]
   end
 
   describe ':license, :message => ...' do
