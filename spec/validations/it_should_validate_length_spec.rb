@@ -66,7 +66,7 @@ describe "it_should_validate_length" do
 
 end
 
-describe "(for nullable attr) it_should_validate_length" do
+describe "(nullable attr) it_should_validate_length" do
 
   before do
     @allow_nil = true
@@ -148,7 +148,7 @@ describe "(for nullable attr) it_should_validate_length" do
 
 end
 
-describe "(for non-nullable attr) it_should_validate_length" do
+describe "(non-nullable attr) it_should_validate_length" do
 
   before do
     @allow_nil = false
