@@ -70,6 +70,7 @@ if Object.const_defined?('DataMapper') && DataMapper.const_defined?('Validate')
   require 'validations/it_should_validate_absent'
   require 'validations/it_should_validate_is_accepted'
   require 'validations/it_should_validate_is_unique'
+  require 'validations/it_should_validate_is_confirmed'
   require 'validations/it_should_validate_length'
   require 'validations/it_should_validate_format'
 
@@ -77,6 +78,7 @@ if Object.const_defined?('DataMapper') && DataMapper.const_defined?('Validate')
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateAbsent)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateIsAccepted)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateIsUnique)
+  Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateIsConfirmed)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateLength)
   Spec::Example::ExampleGroup.extend(DmSkinnySpec::Validations::ItShouldValidateFormat)
 
