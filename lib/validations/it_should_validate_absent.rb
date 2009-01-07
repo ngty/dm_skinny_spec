@@ -12,7 +12,7 @@ module DmSkinnySpec::Validations::ItShouldValidateAbsent
       @message ||= '%s must be absent'.t(@attribute_name)
 
       if @options[:boolean]
-        validate_error_values true, "%s"
+        validate_error_values true
       else
         validate_error_values 'x', "not blank"
       end
