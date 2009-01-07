@@ -11,10 +11,10 @@ module DmSkinnySpec::Validations::ItShouldValidatePresent
     def validate
       if @options[:boolean]
         @message ||= '%s must not be nil'.t(@attribute_name)
-        validate_error_values nil, '%s'
+        validate_error_values nil
       else
         @message ||= '%s must not be blank'.t(@attribute_name)
-        validate_error_values [ nil, '' ], '%s'
+        validate_error_values [ nil, '' ]
       end
     end
 
