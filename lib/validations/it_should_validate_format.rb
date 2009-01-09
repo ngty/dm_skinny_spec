@@ -53,30 +53,19 @@ module DmSkinnySpec::Validations::ItShouldValidateFormat
       def validate
         @message ||= '%s has an invalid format'.t(@attribute_name)
 
+        error_values = 
+          case @options[:as]
+            when :email_address ; invalid_emails
+            when :url           ; invalid_urls
+            else                ; @options.delete(:reject)
+          end
+
         case @options[:allow_nil]
           when nil, true ; validate_ok_values nil
-          else           ; validate_error_values nil
+          else           ; error_values << nil
         end
 
-        case @options[:as]
-          when :email_address ; validate_email_address
-          when :url           ; validate_url
-          else                ; validate_reject_values
-        end
-      end
-
-      def validate_reject_values
-        validate_error_values @options.delete(:reject)
-      end
-
-      def validate_email_address
-        @options[:reject] = invalid_emails
-        validate_reject_values
-      end
-
-      def validate_url
-        @options[:reject] = invalid_urls
-        validate_reject_values
+        validate_error_values error_values
       end
 
   end
