@@ -1,7 +1,7 @@
 module DmSkinnySpec::Validations::ItShouldValidateIsUnique
 
-  def it_should_validate_is_unique( attr, opts={} )
-    DmSkinnySpec::Validations::ItShouldValidateIsUnique.validate attr, opts, self
+  def it_should_validate_is_unique( attribute, options={} )
+    DmSkinnySpec::Validations::ItShouldValidateIsUnique.run attribute, options, self
   end
 
   class << self
@@ -10,15 +10,15 @@ module DmSkinnySpec::Validations::ItShouldValidateIsUnique
 
     private
 
-      def validate_all( attr, context, opts )
-        err_msg = (opts[:message]||'%s is already taken').t(humanize(attr))
-        err_val = lambda { |eg| eg.instance(:other).attribute_get(attr) }
+      def validate
+        @message ||= '%s is already taken'.t(@attribute_name)
+        attribute = @attribute
 
-        validate_err_val( attr, err_val, context,
-          "should not be valid if :#{attr} is not unique" )
+        value_proc = lambda do |example| 
+          example.instance(:other).attribute_get(attribute) 
+        end
 
-        validate_err_msg( attr, err_val, err_msg, context,
-          "should have error \"#{err_msg}\" if :#{attr} is not unique" )
+        validate_error_values value_proc, 'is not unique'
       end
   end
 
