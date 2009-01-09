@@ -42,25 +42,25 @@ describe "it_should_validate_is_accepted" do
     @instances[id] ||= Agreement.gen
   end
 
-  describe ':more_terms, :reject => [...]' do
+  describe '{ :more_terms, :reject => [...] }' do
     it_should_validate_is_accepted :more_terms, 
       :reject => [ '0', 0, 'true', true, 't', 'false', false, 'f' ]
   end
 
-  describe ':license, :message => ...' do
+  describe '{ :license, :message => ... }' do
     it_should_validate_is_accepted :license, 
       :message => 'We hate software pirates'
   end
 
-  describe ':terms' do
+  describe '{ :terms }' do
     it_should_validate_is_accepted :terms
   end
 
-  describe ':terms, :allow_nil => true' do
+  describe '{ :terms, :allow_nil => true }' do
     it_should_validate_is_accepted :terms, :allow_nil => true
   end
 
-  describe ':more_license, :allow_nil => false' do
+  describe '{ :more_license, :allow_nil => false }' do
     it_should_validate_is_accepted :more_license, :allow_nil => false
   end
 
