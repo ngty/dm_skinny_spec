@@ -3,18 +3,18 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
   class UndefinedComparison  < Exception ; end
   class UnexpectedComparison < Exception ; end
 
-  def it_should_validate_length( attr, opts={} )
+  def it_should_validate_length( attribute, options={} )
     validator = DmSkinnySpec::Validations::ItShouldValidateLength
     comparison_cnt = [ 
-        opts[:min] ||= opts.delete(:minimum),
-        opts[:max] ||= opts.delete(:maximum),
-        opts[:is]  ||= opts.delete(:equals),
-        opts[:in]  ||= opts.delete(:within)
+        options[:min] ||= options.delete(:minimum),
+        options[:max] ||= options.delete(:maximum),
+        options[:is]  ||= options.delete(:equals),
+        options[:in]  ||= options.delete(:within)
       ].find_all { |t| t==nil }.length
       
     case comparison_cnt
       when 4 ; raise UndefinedComparison
-      when 3 ; validator.validate( attr, opts, self )
+      when 3 ; DmSkinnySpec::Validations::ItShouldValidateLength.run attribute, options, self 
       else   ; raise UnexpectedComparison
     end
   end
@@ -25,83 +25,59 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
 
     private
 
-      def validate_all( attr, context, opts )
-        opts[:allow_nil] = (val=opts.delete(:allow_nil)).nil? ? true : val
+      def validate
+        @allow_nil = 
+          case @options[:allow_nil]
+            when nil, true ; true
+            else           ; false
+          end
 
-        if range = opts.delete(:in)
-          validate_range( attr, context, range, opts )
-        elsif equal = opts.delete(:is)
-          validate_equal( attr, context, equal, opts )
-        elsif min = opts.delete(:min)
-          validate_min( attr, context, min, opts )
-        elsif max = opts.delete(:max)
-          validate_max( attr, context, max, opts )
+        if range = @options[:in] 
+          validate_range range
+        elsif equal = @options[:is]
+          validate_equal equal
+        elsif min = @options[:min]
+          validate_min min
+        elsif max = @options[:max]
+          validate_max max
         end
       end
 
-      def validate_equal( attr, context, equal, opts )
-        err_msg = (opts[:message]||'%s must be %s characters long') % 
-          [ humanize(attr), equal ]
-        validate_range attr, context, equal..equal, opts.merge(:message=>err_msg)
+      def validate_equal value
+        @message ||= '%s must be %s characters long'.t( @attribute_name, value )
+        validate_range value..value
       end
 
-      def validate_range( attr, context, range, opts )
-        err_msg = (opts[:message]||'%s must be between %s and %s characters long') %
-          [ humanize(attr), range.min, range.max ]
+      def validate_range range
+        max, min = range.max, range.min
+        @message ||= '%s must be between %s and %s characters long'.t( @attribute_name, min, max )
 
-        if range.min == 0
-          opts.update( :message => err_msg )
-          validate_max attr, context, range.max, opts
-          validate_min attr, context, range.min, opts
+        validate_max max, min==0
+        validate_min min
+      end
+
+      def validate_max value, zero_ok=nil
+        @message ||= '%s must be less than %s characters long'.t( @attribute_name, value )
+
+        validate_error_values 'x'*value.succ, "is more than #{value} chars long" 
+
+        if @options[:allow_nil]!=false or zero_ok!=false
+          validate_ok_values nil
         else
-          opts.update( :message => err_msg, :is_max => false )
-          validate_max attr, context, range.max, opts
-          validate_min attr, context, range.min, opts
+          validate_error_values nil
         end
       end
 
-      def validate_max( attr, context, max, opts )
-        is_max = (val=opts[:is_max]).nil? ? true : nil
-        err_msg = (opts[:message]||'%s must be less than %s characters long') % 
-          [ humanize(attr), max ]
-        err_val = 'x' * max.succ
+      def validate_min value
+        @message ||= '%s must be more than %s characters long'.t( @attribute_name, value )
 
-        validate_nil_val attr, context, opts[:allow_nil], 
-          opts.merge( :message => err_msg, :is_max => is_max )
+        if value.pred >= 0
+          validate_error_values 'x'*value.pred, "is less than #{value} chars long"
 
-        validate_err_val attr, err_val, context,
-          "should not be valid if :#{attr} is more than #{max} chars long"
-
-        validate_err_msg attr, err_val, err_msg, context,
-          "should have error \"#{err_msg}\" if :#{attr} is more than #{max} chars long"
-      end
-
-      def validate_min( attr, context, min, opts )
-        err_msg = (opts[:message]||'%s must be more than %s characters long') % 
-          [ humanize(attr), min ]
-
-        if min.pred >= 0
-          err_val = 'x' * min.pred
-
-          validate_nil_val attr, context, opts[:allow_nil], 
-            opts.merge( :message => err_msg )
-
-          validate_err_val attr, err_val, context,
-            "should not be valid if :#{attr} is less than #{min} chars long"
-
-          validate_err_msg attr, err_val, err_msg, context,
-            "should have error \"#{err_msg}\" if :#{attr} is less than #{min} chars long"
-        end
-      end
-
-      def validate_nil_val( attr, context, allow_nil, opts )
-        if allow_nil or opts[:is_max]
-          validate_ok_val attr, nil, context, "should be valid if :#{attr} is nil"
-        else
-          err_msg = opts[:message]
-          validate_err_val attr, nil, context, "should not be valid if :#{attr} is nil"
-          validate_err_msg attr, nil, err_msg, context, 
-            "should have error \"#{err_msg}\" if :#{attr} is nil"
+          case @options[:allow_nil]
+            when true, nil ; validate_ok_values    nil
+            else           ; validate_error_values nil
+          end
         end
       end
 
