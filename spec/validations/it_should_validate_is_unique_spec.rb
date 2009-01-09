@@ -36,15 +36,15 @@ describe 'it_should_validate_is_unique' do
     @instances[id] ||= User.gen
   end
 
-  describe ':email' do
+  describe '{ :email }' do
     it_should_validate_is_unique :email
   end
 
-  describe ':address, :message => "..."' do
+  describe '{ :address, :message => "..." }' do
     it_should_validate_is_unique :address, :message => 'Two users cannot share the same home'
   end
 
-  describe ':name, :when => :name_test' do
+  describe '{ :name, :when => :name_test }' do
     it_should_validate_is_unique :name, :when => :name_test
   end
   
