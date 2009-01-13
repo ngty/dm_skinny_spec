@@ -1,14 +1,15 @@
 module DmSkinnySpec::Validations::ItShouldValidateIsConfirmed
 
   def it_should_validate_is_confirmed( attribute, options={} )
-    DmSkinnySpec::Validations::ItShouldValidateIsConfirmed.run attribute, options, self
+    builder = DmSkinnySpec::Validations::ItShouldValidateIsConfirmed
+    builder.create_expectations_for attribute, options, self
   end
 
   class << self
 
     include DmSkinnySpec::Validations::Common
 
-    def validate
+    def create_expectations
       @message ||= '%s does not match the confirmation'.t(@attribute_name)
       @confirm = @options[:confirm] || "#{@attribute}_confirmation".to_sym
       confirm, attribute = @confirm, @attribute
@@ -17,20 +18,16 @@ module DmSkinnySpec::Validations::ItShouldValidateIsConfirmed
         '%s.%s'.t( (@orig_ok_value||=instance.attribute_get(attribute)), i )
       }
 
-      validate_ok_values value_proc, 'matches confirmation'
-      validate_error_values value_proc, 'does not match confirmation'
-
-      case @options[:allow_nil]
-        when true, nil ; validate_ok_values nil, 'is nil'
-        else           ; validate_error_values nil, 'is nil'
-      end
+      create_expectations_for_values value_proc, :type => :ok, :description => 'matches confirmation'
+      create_expectations_for_values value_proc, :description => 'does not match confirmation'
+      create_expectations_for_values nil, :type => @allow_nil ? :ok : :error
     end
 
-    def validate_ok_value(value)
+    def create_expectation_for_ok_value(value)
       confirm, context, attribute = @confirm, @context, @attribute
       description = "should be valid if :%s %s".t( attribute, humanize_condition(value) )
 
-      run_example description do
+      expect description do
         ok_val = value.is_a?(Proc) ? value : lambda{|a,b| value }
         instance.attribute_set( attribute, ok_val[instance,0] )
         instance.send( "#{confirm}=", ok_val[instance,0] )
@@ -38,11 +35,11 @@ module DmSkinnySpec::Validations::ItShouldValidateIsConfirmed
       end
     end
 
-    def validate_error_value(value)
+    def create_expectation_for_error_value(value)
       confirm, context, attribute = @confirm, @context, @attribute
       description = "should not be valid if :%s %s".t( attribute, humanize_condition(value) )
 
-      run_example description do
+      expect description do
         ok_val  = instance.attribute_get(attribute)
         err_val = value.is_a?(Proc) ? value : lambda{|a,b| value }
 
@@ -56,11 +53,11 @@ module DmSkinnySpec::Validations::ItShouldValidateIsConfirmed
       end
     end
 
-    def validate_error_message(value)
+    def create_expectation_for_error_message(value)
       message, confirm, context, attribute = @message, @confirm, @context, @attribute
       description = "should have error \"%s\" if :%s %s".t( message, attribute, humanize_condition(value) )
 
-      run_example description do
+      expect description do
         ok_val  = instance.attribute_get(attribute)
         err_val = value.is_a?(Proc) ? value : lambda{|a,b| value }
         err_msg = message.is_a?(Proc) ? message : lambda{|_| message }

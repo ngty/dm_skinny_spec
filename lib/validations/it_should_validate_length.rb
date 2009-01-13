@@ -4,7 +4,7 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
   class UnexpectedComparison < Exception ; end
 
   def it_should_validate_length( attribute, options={} )
-    validator = DmSkinnySpec::Validations::ItShouldValidateLength
+    builder = DmSkinnySpec::Validations::ItShouldValidateLength
     comparison_cnt = [ 
         options[:min] ||= options.delete(:minimum),
         options[:max] ||= options.delete(:maximum),
@@ -14,7 +14,7 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
       
     case comparison_cnt
       when 4 ; raise UndefinedComparison
-      when 3 ; DmSkinnySpec::Validations::ItShouldValidateLength.run attribute, options, self 
+      when 3 ; builder.create_expectations_for attribute, options, self 
       else   ; raise UnexpectedComparison
     end
   end
@@ -25,59 +25,50 @@ module DmSkinnySpec::Validations::ItShouldValidateLength
 
     private
 
-      def validate
-        @allow_nil = 
-          case @options[:allow_nil]
-            when nil, true ; true
-            else           ; false
-          end
-
+      def create_expectations
         if range = @options[:in] 
-          validate_range range
+          create_expectation_for_range range
         elsif equal = @options[:is]
-          validate_equal equal
+          create_expectation_for_equal equal
         elsif min = @options[:min]
-          validate_min min
+          create_expectation_for_min min
         elsif max = @options[:max]
-          validate_max max
+          create_expectation_for_max max
         end
       end
 
-      def validate_equal value
+      def create_expectation_for_equal value
         @message ||= '%s must be %s characters long'.t( @attribute_name, value )
-        validate_range value..value
+        create_expectation_for_range value..value
       end
 
-      def validate_range range
+      def create_expectation_for_range range
         max, min = range.max, range.min
         @message ||= '%s must be between %s and %s characters long'.t( @attribute_name, min, max )
 
-        validate_max max, min==0
-        validate_min min
+        create_expectation_for_max max, min==0
+        create_expectation_for_min min
       end
 
-      def validate_max value, zero_ok=nil
+      def create_expectation_for_max value, zero_ok=nil
         @message ||= '%s must be less than %s characters long'.t( @attribute_name, value )
 
-        validate_error_values 'x'*value.succ, "is more than #{value} chars long" 
+        create_expectations_for_values 'x'*value.succ, 
+          :description => "is more than #{value} chars long", :type => :error
 
-        if @options[:allow_nil]!=false or zero_ok!=false
-          validate_ok_values nil
-        else
-          validate_error_values nil
-        end
+        create_expectations_for_values nil,
+          :type => ( @allow_nil or zero_ok!=false ) ? :ok : :error
       end
 
-      def validate_min value
+      def create_expectation_for_min value
         @message ||= '%s must be more than %s characters long'.t( @attribute_name, value )
 
         if value.pred >= 0
-          validate_error_values 'x'*value.pred, "is less than #{value} chars long"
+          create_expectations_for_values 'x'*value.pred, 
+            :description => "is less than #{value} chars long"
 
-          case @options[:allow_nil]
-            when true, nil ; validate_ok_values    nil
-            else           ; validate_error_values nil
-          end
+          create_expectations_for_values nil, 
+            :type => @allow_nil ? :ok : :error
         end
       end
 

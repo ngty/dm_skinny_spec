@@ -4,17 +4,17 @@ module DmSkinnySpec::Validations::ItShouldValidateFormat
   class UndefinedRejectValues < Exception ; end
 
   def it_should_validate_format( attribute, options={} )
-    validator =  DmSkinnySpec::Validations::ItShouldValidateFormat
     options[:as] ||= options.delete(:with)
+    builder = DmSkinnySpec::Validations::ItShouldValidateFormat
 
     case options[:as]
       when :url, :email_address
-        validator.run attribute, options, self
+        builder.create_expectations_for attribute, options, self
       when Symbol
         raise UnexpectedFormat
       else
         raise UndefinedRejectValues unless options[:reject]
-        validator.run attribute, options, self
+        builder.create_expectations_for attribute, options, self
     end
   end
 
@@ -50,7 +50,7 @@ module DmSkinnySpec::Validations::ItShouldValidateFormat
 
     private
 
-      def validate
+      def create_expectations
         @message ||= '%s has an invalid format'.t(@attribute_name)
 
         error_values = 
@@ -60,12 +60,11 @@ module DmSkinnySpec::Validations::ItShouldValidateFormat
             else                ; @options.delete(:reject)
           end
 
-        case @options[:allow_nil]
-          when nil, true ; validate_ok_values nil
-          else           ; error_values << nil
+        if @allow_nil
+          create_expectations_for_values nil, :type => :ok
+        else 
+          create_expectations_for_values [ error_values, nil ].flatten
         end
-
-        validate_error_values error_values
       end
 
   end
