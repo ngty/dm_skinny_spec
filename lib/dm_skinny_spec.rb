@@ -6,7 +6,6 @@ require 'rubygems'
 gem 'rspec',  '>=1.1.11'
 gem 'extlib', '>=0.9.9'
 
-require 'pathname'
 require 'spec'
 require 'extlib'
 
