@@ -1,0 +1,93 @@
+= dm_skinny_spec
+
+* http://github.com/ngty/dm_skinny_spec
+
+== DESCRIPTION:
+
+Helpers to cut off execessive fat from ur datamapper models' specs !!
+
+== FEATURES:
+
+* Provides spec helpers for the following dm-validations validators:
+  - validates_absent
+  - validates_format
+  - validates_is_accepted
+  - validates_is_confirmed
+  - validates_is_unique
+  - validates_length
+  - validates_present
+
+== SYNOPSIS:
+
+  require 'dm_skinny_spec'
+
+  class User
+    include DataMapper::Resource
+  
+    property :id,    Serial
+    property :name,  String, :auto_validation => false
+    property :email, String, :auto_validation => false
+  
+    validates_length :name,  :min => 5
+    validates_format :email, :as => :email_address, :allow_nil => false
+  end
+
+  User.fix {{ 
+    :name  => /\w{5,10}/.gen,
+    :email => /\w{10}/.gen + '@fmail.com',
+  }}
+
+  describe User do
+  
+    before do
+      User.auto_migrate!
+      @instances = {}
+    end
+  
+    # This MUST be provided since we do not mandate u to use any specific fixture 
+    # utility.
+    def instance(id=:default)
+      @instances[id] ||= User.gen
+    end
+  
+    it_should_validate_length :name, :min => 5
+    it_should_validate_format :email, :as => :email_address, :allow_nil => false
+  
+  end
+
+== REQUIREMENTS:
+
+* dm-validations >= 0.9.8
+* extlib >= 0.9.9
+* rspec >= 1.11.1
+
+== INSTALL:
+
+* git-clone git://github.com/ngty/dm_skinny_spec.git
+* cd dm_skinny_spec 
+* rake install_gem
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2008 NgTzeYang
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

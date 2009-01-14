@@ -1,0 +1,10 @@
+== 0.1.0 2009-01-15
+
+* Initial release that implements expectations builders for the following dm validators:
+  - validates_absent
+  - validates_format
+  - validates_is_accepted
+  - validates_is_confirmed
+  - validates_is_unique
+  - validates_length
+  - validates_present
