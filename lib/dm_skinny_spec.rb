@@ -12,9 +12,3 @@ require 'extlib'
 
 require 'dm_skinny_spec/version'
 require 'validations'
-
-module DmSkinnySpec
-  
-
-end
-
