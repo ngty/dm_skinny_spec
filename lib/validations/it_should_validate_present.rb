@@ -2,11 +2,11 @@ module DmSkinnySpec::Validations::ItShouldValidatePresent
 
   ##
   # Creates expectations for verifying that +attribute+'s value is not blank, where:
-  # * for boolean value, blank equals nil,
   # * for string value, blank equals '' and nil
+  # * for all other types of value, blank equals nil,
   #
   # Supported options are:
-  # * :boolean ... whether the attribute is a boolean, default is false
+  # * :type    ... the class for the attribute, default is :String
   # * :message ... customize the expected error message (optional)
   # * :when    ... context in which the validation applies (optional)
   # 
@@ -49,7 +49,7 @@ module DmSkinnySpec::Validations::ItShouldValidatePresent
   #     end
   #   
   #     it_should_validate_present :email
-  #     it_should_validate_present :is_active, :boolean => true
+  #     it_should_validate_present :is_active, :type => :Boolean
   #     it_should_validate_present :address, :message => 'User cannot be homeless'
   #     it_should_validate_present :name, :when => :name_test
   #     
@@ -67,12 +67,16 @@ module DmSkinnySpec::Validations::ItShouldValidatePresent
     private
 
       def create_expectations
-        if @options[:boolean]
-          @message ||= '%s must not be nil'.t(@attribute_name)
-          create_expectations_for_values nil
-        else
-          @message ||= '%s must not be blank'.t(@attribute_name)
-          create_expectations_for_values [ nil, '' ]
+        case @options[:type]
+          when :String, nil
+            @message ||= '%s must not be blank'.t(@attribute_name)
+            create_expectations_for_values [ nil, '' ]
+          when :Boolean
+            @message ||= '%s must not be nil'.t(@attribute_name)
+            create_expectations_for_values nil
+          else
+            @message ||= '%s must not be blank'.t(@attribute_name)
+            create_expectations_for_values nil
         end
       end
 
